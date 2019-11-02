@@ -8,6 +8,12 @@ RIGHT = 1
 DOWN = 2
 LEFT = 3
 
+
+
+
+
+
+
 class CliffWalkingEnv(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
