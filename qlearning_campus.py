@@ -35,7 +35,7 @@ class Estimator():
                        nn.Linear(hiddenLayerSize, outputLayerSize) 
                        ,nn.Sigmoid())
             self.models.append(model)
-            opt = optim.Adam(self.models[i].parameters(), lr=self.lr)
+            opt = optim.SGD(self.models[i].parameters(), lr=self.lr)
             self.optimizers.append(opt)
             
     #Return prediction on the state    

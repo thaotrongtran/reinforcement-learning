@@ -109,12 +109,23 @@ def categorical_sample(prob_n, np_random):
     csprob_n = np.cumsum(prob_n)
     return (csprob_n > np_random.rand()).argmax()
 
-        
+################################################################
+    
 class CampusEnv():
-    #Just the transition not the actual stepping on step
+
     def _calculate_transition_prob(self, a):
-        current = copy.deepcopy(self.s) #Get a copy of the current state
+        
+        current = self.s.copy() #Get a copy of the current state
         return_transitions = []
+        is_done = False
+        
+        sum = 0
+        for i in self.lots:
+            sum += i
+        
+        if sum == 0:
+            return_transitions.append((1.0, current, 0, True)) 
+            
         is_done = False;
         if (current[a] > 0):
             reward = 0;
@@ -131,29 +142,8 @@ class CampusEnv():
                 is_done = True
                 state = np.append(current[0:8], [-1])  #Append dummy value to the next state with no student
             return_transitions.append((1.0, state, reward, is_done)) 
-        else: #If the chosen lot is full, other lot can take it
-            #indexes = np.where(current[0:8] > 0)[0]    
-           # if len(indexes) > 0:
-             #   probability = 1/len(indexes)
-            #    for i in indexes:
-               #     reward = 0;
-                #    temp = copy.deepcopy(current)
-               #     temp[i] -= 1 #Decrease capacity by one
-                #    if(i == current[-1]): #Check reward
-                #        reward += 10
-                #    else:
-                #        reward += 1
-                #get new student in
-                #    if len(self.students) > 1:
-                 #       next_student = self.students[1]  #Get the next in line student
-                 #       state = np.append(temp[0:8], next_student.preference)
-                 #   else:
-                 #       state = np.append(temp[0:8], [-1]) #Append dummy value to the next state with no student
-                 #       is_done = True;
-                 #   return_transitions.append((probability, state, reward, is_done)) 
-            #else:
-               # return_transitions.append((1.0, current, 0, True)) #If nothing else is available
-            return_transitions.append((1.0, current, 0, is_done)) 
+        else:
+            return_transitions.append((1.0, current, -3, is_done)) 
         return return_transitions
     
     def seed(self, seed=None):
@@ -164,9 +154,10 @@ class CampusEnv():
         transitions = self._calculate_transition_prob(a)
         i = categorical_sample([t[0] for t in transitions], self.np_random) 
         p, s, r, d= transitions[i]
+        #print(transitions[i], "transions")
         #print(self.s, "old state")
         
-        if( not np.array_equal(self.s,s )):
+        if(not np.array_equal(self.s,s )):
             self.s = s  #Actually making the transition
             self.lots = s[0:8] #Change the lots
             if(len(self.students) > 0):
@@ -189,7 +180,7 @@ class CampusEnv():
         self.lots = [3,4,5,6,5,4,3,2]
         
         students = []
-        for i in range(28):
+        for i in range(38):
             students.append(Student())
         self.students = copy.deepcopy(students)
         self.original_students = copy.deepcopy(students)
