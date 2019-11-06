@@ -143,7 +143,7 @@ class CampusEnv():
                 state = np.append(current[0:8], [-1])  #Append dummy value to the next state with no student
             return_transitions.append((1.0, state, reward, is_done)) 
         else:
-            return_transitions.append((1.0, current, -3, is_done)) 
+            return_transitions.append((1.0, current, -5, is_done)) 
         return return_transitions
     
     def seed(self, seed=None):
@@ -168,7 +168,7 @@ class CampusEnv():
         return (s, r, d, {"prob" : p})
 
     def reset(self):
-        self.lots = [3,4,5,6,5,4,3,2]
+        self.lots = [30,40,50,60,50,40,30,20]
         self.students = copy.deepcopy(self.original_students)  #Reseting to original students
         #print(len(self.original_students))
         self.current_student = self.students.pop() #Pop a new student
@@ -177,10 +177,10 @@ class CampusEnv():
 
     def __init__(self):
         #Initialize lots capacity
-        self.lots = [3,4,5,6,5,4,3,2]
+        self.lots = [80,40,50,70,50,40,30,20]
         
         students = []
-        for i in range(38):
+        for i in range(250):
             students.append(Student())
         self.students = copy.deepcopy(students)
         self.original_students = copy.deepcopy(students)

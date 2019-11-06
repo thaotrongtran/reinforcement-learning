@@ -23,41 +23,39 @@ env = CampusEnv()
 class Estimator():
     #Initialize the model
     def __init__(self):
-        inputLayerSize, hiddenLayerSize, outputLayerSize = 9, 10, 1
+        inputLayerSize, hiddenLayerSize, outputLayerSize = 9, 20, 8
         self.lr = 1e-3;
         self.criterion = nn.MSELoss()
         self.losses = []  #for visulization purpose
         self.models = []
         self.optimizers = []
-        for i in range(8):
-            model = nn.Sequential(nn.Linear(inputLayerSize, hiddenLayerSize),
+        self.model = nn.Sequential(nn.Linear(inputLayerSize, hiddenLayerSize),
                                   nn.Sigmoid(),
                        nn.Linear(hiddenLayerSize, outputLayerSize) 
                        ,nn.Sigmoid())
-            self.models.append(model)
-            opt = optim.SGD(self.models[i].parameters(), lr=self.lr)
-            self.optimizers.append(opt)
+        self.opt = optim.SGD(self.model.parameters(), lr=self.lr)
             
     #Return prediction on the state    
-    def predict(self,s,a = None):
+    def predict(self,s):
         s = torch.from_numpy(s).float()
-        if not a:
-            return np.array([m(s).detach().numpy()for m in self.models]).flatten()
-        else:
-            return self.models[a](s).detach().numpy()
+        return self.model(s).detach().numpy()
        
     def update(self, s, a, y, i_episode):
         s = torch.from_numpy(s).float()
-        yhat = self.models[a](s)
+        yhat = self.model(s)[a]  #You only update based on the difference of that only one action
         #print(s)
         #print(yhat, "Q-s-a-estimated")
         y = torch.from_numpy(np.array(y)).view(1).float()
+        #yhat[a] = y[a] #Isoloate so that you only take a in
         #print(y, "TD Target")
+        
+        #print(yhat, "yhat")
+        #print(y, "y")
         loss = self.criterion(y, yhat)
         #print(loss, "loss")
         loss.backward()
-        self.optimizers[a].step() 
-        self.optimizers[a].zero_grad()
+        self.opt.step() 
+        self.opt.zero_grad()
         self.losses.append(loss.item())
         #if i_episode%25==0:
            # clf(); fig = figure(0, (18, 9))
@@ -193,10 +191,10 @@ def q_learning(env, estimator, num_episodes, discount_factor=1.0, alpha=0.5, eps
         #Plotting rewards while training
         rewards_cumulative.append(stats.episode_rewards[i_episode])
         #if i_episode%1==0:
-            #clf(); fig = figure(0, (18, 9))
-            #plot(rewards_cumulative, linewidth = 2)
+          #  clf(); fig = figure(0, (18, 9))
+           # plot(rewards_cumulative, linewidth = 2)
            # xlabel('Episodes'); ylabel('reward')
-            #display.clear_output(wait=True); display.display(gcf())
+           # display.clear_output(wait=True); display.display(gcf())
         
     return stats
 
